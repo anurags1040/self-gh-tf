@@ -1,5 +1,13 @@
-# Ignore Terraform state files
+**/.terraform/*
+
+# .tfstate files
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
+
 *.tfvars
-.terraform/
+*.tfvars.json
+
+# Ignore transient lock info files created by terraform apply
+.terraform.tfstate.lock.info
+
+
