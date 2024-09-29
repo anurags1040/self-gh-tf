@@ -1,6 +1,3 @@
-#user id error for reviewers. The following data block converts the github username to github user id which
-#is the accepted format here.
-
 # Check if repositories already exist using a data source
 data "github_repository" "existing_repos" {
   for_each = var.github_config.repositories
@@ -20,6 +17,8 @@ resource "github_repository" "repos" {
   # Add other repository configuration details here if necessary
 }
 
+#user id error for reviewers. The following data block converts the github username to github user id which
+#is the accepted format here.
 # Lookup GitHub user IDs based on usernames
 data "github_user" "reviewer_ids" {
   for_each = toset(flatten([
@@ -61,3 +60,11 @@ resource "github_repository_environment" "environments" {
   }
 }
 
+resource "github_actions_environment_secret" "environment_secrets" {
+  for_each = { for idx, secret in local.environment_secrets : "${secret.repository_name}-${secret.environment_name}-${secret.secret_name}" => secret }
+
+  repository     = try(github_repository.repos[each.value.repository_name].name, data.github_repository.existing_repos[each.value.repository_name].name)
+  environment    = each.value.environment_name
+  secret_name    = each.value.secret_name
+  plaintext_value = each.value.secret_value
+}

@@ -13,6 +13,9 @@ variable "github_config" {
           protected_branches     = bool
           custom_branch_policies = bool
         })
+        secrets = optional(map(object({
+            value = string
+        })), {})    
       }))
     }))
   })
