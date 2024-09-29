@@ -7,6 +7,6 @@ terraform {
   }
 }
 
-provider "github" {
-  owner = var.github_config.repository_owner
-}
+# provider "github" {
+#   owner = var.github_config.repository_owner
+# }
