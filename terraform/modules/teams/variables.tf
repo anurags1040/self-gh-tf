@@ -36,6 +36,11 @@ variable "target_environment" {
   type        = string
 }
 
+variable "repository_names" {
+  description = "The list of GitHub repositories to which teams will be assigned."
+  type        = map(string)
+}
+
 # variable "team_members_config" {
 #   description = "Mapping of GitHub teams to their respective members"
 #   type = map(list(string))  # Map of teams to a list of GitHub usernames

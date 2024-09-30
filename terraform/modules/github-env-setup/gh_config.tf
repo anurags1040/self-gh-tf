@@ -1,20 +1,18 @@
 # # Check if repositories already exist using a data source
-# Check if repositories already exist using a data source
 data "github_repository" "existing_repos" {
   for_each = var.github_config.repositories
   name     = each.key
 }
 
-# Create repositories only if they do not exist
 resource "github_repository" "repos" {
   for_each = {
     for repo, repo_config in var.github_config.repositories :
     repo => repo_config
+    if try(data.github_repository.existing_repos[repo].id, null) == null  # Only create if repo doesn't exist
   }
 
   name = each.key
 }
-
 
 #user id error for reviewers. The following data block converts the github username to github user id which
 #is the accepted format here.

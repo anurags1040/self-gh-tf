@@ -1,36 +1,38 @@
-# Create teams dynamically
+# Data block to check if the teams already exist
+data "github_team" "existing_teams" {
+  for_each = var.teams_config
+
+  slug = each.key
+}
+
 resource "github_team" "teams" {
   for_each = var.teams_config
 
   name        = each.key
   description = each.value.description
-  privacy     = "closed"
-  
-  # Set parent team if it exists
-  parent_team_id = try(github_team.teams[each.value.parent_team].id, null)
+  privacy     = "closed"  # Ensure privacy is compatible with child teams
+
+  # Ensure parent_team_id is only set after the parent team exists
 }
 
-# Assign repository permissions dynamically to teams
-resource "github_team_repository" "team_repo_permissions" {
-  for_each = {
-    for team_name, team_config in var.teams_config : 
-    team_name => {
-      team_id         = github_team.teams[team_name].id
-      permission      = team_config.repo_permission
-      environment_only = lookup(team_config, "environment_only", null) # Optional field
-    }
-    # Filter out entries if 'environment_only' is specified and doesn't match the intended environment
-    if lookup(team_config, "environment_only", null) == null
-      || lookup(team_config, "environment_only", null) == var.target_environment
-  }
 
-  team_id    = each.value.team_id
-  repository = github_repository.repos[each.key].name
-  permission = each.value.permission
+# Use data source to fetch parent team IDs if needed
+data "github_team" "parent_teams" {
+  for_each = { for team_name, team_config in var.teams_config : team_name => team_config if team_config.parent_team != "" }
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  slug = each.value.parent_team
+}
+
+# Update parent_team_id for child teams (only after they have been created)
+resource "github_team" "update_parent_team" {
+  for_each = { for team_name, team_config in var.teams_config : team_name => team_config if team_config.parent_team != "" }
+
+  name = each.key
+
+  # Assign the parent_team_id using the data source
+  parent_team_id = data.github_team.parent_teams[each.key].id
+
+  depends_on = [github_team.teams, data.github_team.parent_teams]
 }
 
 # Add members to teams dynamically
