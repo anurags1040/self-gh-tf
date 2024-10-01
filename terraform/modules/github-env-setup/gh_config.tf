@@ -56,6 +56,10 @@ resource "github_repository_environment" "environments" {
     custom_branch_policies = each.value.branch_policies.protected_branches ? false : each.value.branch_policies.custom_branch_policies
   }
 
+   lifecycle {
+    ignore_changes = [environment, reviewers, repository]
+  }
+
   depends_on = [github_repository.repos]
 }
 
@@ -69,13 +73,24 @@ resource "github_repository_environment" "environments" {
 #   }
 # }
 
+
+#This change uses the try() function to look for the repository in github_repository.repos, 
+#and if it’s not there, it looks in data.github_repository.existing_repos. This ensures that it can handle 
+#both newly created and existing repositories.
+
 resource "github_actions_environment_secret" "environment_secrets" {
   for_each = { for idx, secret in local.environment_secrets : "${secret.repository_name}-${secret.environment_name}-${secret.secret_name}" => secret }
 
-  repository     = github_repository.repos[each.value.repository_name].name
+  repository     = try(github_repository.repos[each.value.repository_name].name, data.github_repository.existing_repos[each.value.repository_name].name)
   environment    = each.value.environment_name
   secret_name    = each.value.secret_name
   plaintext_value = each.value.secret_value
 
+   lifecycle {
+    ignore_changes = [
+      plaintext_value
+    ]
+  }
+  
   depends_on = [github_repository.repos]
 }

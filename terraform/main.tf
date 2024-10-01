@@ -8,8 +8,5 @@ module "teams" {
   source = "./modules/teams/"
 
   teams_config       = var.teams_config
-  target_environment = var.target_environment
-
-  # Pass repository names from the github-setup module to the teams module
-  repository_names   = module.github_setup.repository_names
+  repository_names   = var.repository_names
 }
