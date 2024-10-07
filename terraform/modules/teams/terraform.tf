@@ -12,5 +12,5 @@ terraform {
 # }
 
 provider "github" {
-  owner = "asharma-sbx"     # Reference the organization
+  owner = "asharma-sbx"     # Reference the organization#
 }
