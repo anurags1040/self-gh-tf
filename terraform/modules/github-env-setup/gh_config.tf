@@ -114,7 +114,7 @@ resource "github_branch" "default_branches" {
           branch     = branch_name
           source_branch = "main"
         }
-      if branch_name != "feature/*"  # Exclude the wildcard pattern
+      if !contains(["feature/*", "bugfix/*", "release/*"], branch_name)  # Exclude all wildcard patterns
     }
   ]...)
 
@@ -151,7 +151,7 @@ resource "github_branch_protection" "pattern_protection" {
                   pattern    = branch_name
                   protection = branch_config
                 }
-              if contains(["feature/*", "bugfix/*"], branch_name)
+              if contains(["feature/*", "bugfix/*", "release/*"], branch_name)
             }
         ]...)
     ]...) :
