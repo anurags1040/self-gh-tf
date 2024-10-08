@@ -6,20 +6,51 @@ variable "repo_name" {
 variable "github_config" {
   description = "Configuration for GitHub repositories and their environments"
   type = object({
-    repositories = map(object({
-      environments = map(object({
-        reviewers = list(string)
-        branch_policies = object({
-          protected_branches     = bool
-          custom_branch_policies = bool
-        })
-        secrets = optional(map(object({
-            value = string
-        })), {})    
-      }))
-    }))
+    repositories = optional(map(object({
+      environments = optional(map(object({
+        reviewers = optional(list(string))
+        branch_policies = optional(object({
+          protected_branches     = optional(bool)
+          custom_branch_policies = optional(bool)
+          rules = optional(map(object({
+            block_deletions     = optional(bool)
+            block_force_pushes  = optional(bool)
+            required_approvals  = optional(number)
+            dismiss_stale_reviews = optional(bool)
+            require_up_to_date_branch = optional(bool)
+            require_code_owner_reviews = optional(bool)
+            required_status_checks = optional(list(string))
+            strict_status_checks = optional(bool)
+            approvals_reset_on_source_change = optional(bool)
+            reset_approvals_if_diff_changes = optional(bool)
+            prevent_merge_with_unresolved_tasks = optional(bool)
+            require_last_push_approval = optional(bool)
+            allow_merge_with_unresolved_checks = optional(bool)
+            restrict_pushes = optional(bool)
+            push_restrictions = optional(list(string))
+            status_checks = optional(list(string))
+          })))
+        }))
+      })))
+      branches = optional(map(object({
+        required_approving_review_count = optional(number)
+        dismiss_stale_reviews = optional(bool)
+        require_up_to_date_branch = optional(bool)
+        require_code_owner_reviews = optional(bool)
+        required_status_checks = optional(list(string))
+        strict_status_checks = optional(bool)
+        approvals_reset_on_source_change = optional(bool)
+        reset_approvals_if_diff_changes = optional(bool)
+        prevent_merge_with_unresolved_tasks = optional(bool)
+        require_last_push_approval = optional(bool)
+        allow_merge_with_unresolved_checks = optional(bool)
+        restrict_pushes = optional(bool)
+      })))
+    })))
   })
+  default = {}
 }
+
 
 # variable "teams_config" {
 #   description = "Configuration for GitHub teams and their permissions"
